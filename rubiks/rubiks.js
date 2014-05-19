@@ -70,16 +70,16 @@ var mouse = new THREE.Vector2( 0, 0 ),
 function onMousedown(event) {
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y =  - ( event.clientY / window.innerHeight ) * 2 + 1;
-	console.log(mouse);
+	// console.log(mouse);
 
 	vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
 	projector.unprojectVector(vector, camera);
-	raycaster = new THREE.Ray(camera.position, vector.sub(camera.position).normalize() );
+	raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
 
 	intersects = raycaster.intersectObjects(cubeArray);
 
 	if ( intersects.length ) {
-		console.log('test');
+		console.log( intersects.shift() );
 	}
 }
 document.addEventListener('mousedown', onMousedown);
