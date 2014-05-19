@@ -1,14 +1,18 @@
+/**
+ * 创造场景
+ */
+var scene = new THREE.Scene();
+var $container = document.getElementById('container');
+
 // 场景大小
-var WIDTH = 400,
-	HEIGHT = 300;
+var WIDTH = 800,
+	HEIGHT = 600;
 
 // 相机属性
 var VIEW_ANGLE = 45,
 	ASPECT = WIDTH/HEIGHT,
 	NEAR = 0.1,
 	FAR = 10000;
-
-var $container = document.getElementById('container');
 
 // 建造webgl渲染器、相机和场景
 var renderer = new THREE.WebGLRenderer();
@@ -19,13 +23,12 @@ var camera = new THREE.PerspectiveCamera(
 		FAR
 	);
 
-var scene = new THREE.Scene();
+camera.position.z = 30;
 
 // 把相机添加到场景里去
 scene.add(camera);
 
 // 放置相机
-camera.position.z = 300;
 
 // 开始渲染
 renderer.setSize(WIDTH, HEIGHT);
@@ -34,38 +37,41 @@ renderer.setSize(WIDTH, HEIGHT);
 $container.appendChild( renderer.domElement );
 
 
-
-// 配置 球形 的变量
-var radius = 50,
-	segments = 16,
-	rings = 16;
-
-var sphere = new THREE.Mesh(
-	new THREE.SphereGeometry(radius, segments, rings),
-	sphereMaterial);
-
-// 添加进场景
-scene.add(sphere);
-
-// 简单的材质
-var sphereMaterial = new THREE.MeshLambertMaterial({
-	color: 0xCC0000
-});
+/**
+ * 添加物体
+ */
+var geometry = new THREE.BoxGeometry(5,5,5);
+var geoCylinder = new THREE.CylinderGeometry( 5, 5, 10, 32);
+var material = new THREE.MeshPhongMaterial({color:0xff0000});
+var cube = new THREE.Mesh( geometry, material );
+var cylinder = new THREE.Mesh( geoCylinder, material );
+cylinder.position.set(-10,0,-10);
+cylinder.rotation.z = -85;
+scene.add( cube );
+scene.add( cylinder );
 
 
-// 灯光
-var pointLight = new THREE.PointLight(0xFFFFFF);
+/**
+ * 添加灯光
+ */
+var pointLight = new THREE.PointLight(0xffffff, 9, 100);
+var ambLight = new THREE.AmbientLight( 0x660000, 0.02, 50 );
+pointLight.position.set(50,50,50);
+ambLight.position.set (-50,-50,-50);
+scene.add( pointLight );
+scene.add( ambLight );
 
-pointLight.position.x = 10;
-pointLight.position.y = 50;
-pointLight.position.z = 130;
+/**
+ * 渲染
+ */
+function render() {
+	requestAnimationFrame(render);
 
-scene.add(pointLight);
+	cube.rotation.x += 0.1;
+	cube.rotation.y += 0.1;
 
+	cylinder.rotation.y += 0.05;
 
-renderer.render(scene, camera);
-
-
-sphere.geometry.dynamic = true;
-sphere.geometry.verticesNeedUpdate = true;
-sphere.geometry.normalsNeedUpdate = true;
+	renderer.render(scene, camera);
+}
+render();
