@@ -10,7 +10,7 @@ renderer = Detector.webgl?
 		: new THREE.CanvasRenderer();
 
 renderer.setClearColor(0xffffff);
-camera.position.set(300,300,300);
+camera.position.set(360,360,360);
 camera.lookAt(scene.position);
 scene.add(camera);
 renderer.setSize(WIDTH, HEIGHT);
@@ -43,19 +43,21 @@ for (var i = 1; i < 9; i++) {
 var cubeMaterial = new THREE.MeshFaceMaterial(materialArray);
 
 // 魔方基本模型
-var cubeArray = [], cube,
-	x,y,z;
+var cubeArray = [],
+	cube = new THREE.Mesh(cubeGeo.clone(), cubeMaterial),
+	_cube,x,y,z;
+
 for (x=0; x < 3; x++) {
 	for (y=0; y < 3; y++) {
 		for (z=0; z < 3; z++) {
-			cube = new THREE.Mesh(cubeGeo.clone(), cubeMaterial);
-			cube.position.set(
+			_cube = cube.clone();
+			_cube.position.set(
 					(x-1)*cubeWidth,
 					(y-1)*cubeWidth,
 					(z-1)*cubeWidth);
 
-			cubeArray.push(cube);
-			scene.add(cube);
+			cubeArray.push(_cube);
+			scene.add(_cube);
 		}
 	}
 }
@@ -65,7 +67,14 @@ var mouse = new THREE.Vector2( 0, 0 ),
 	projector = new THREE.Projector(),
 	raycaster,
 	intersects,
-	vector;
+	vector,
+	mouseDirector,
+	dragStart,
+	hitOjb;
+
+document.addEventListener('mousedown', onMousedown);
+document.addEventListener('mouseup', onMouseup);
+document.addEventListener('mousemove', onMousemove);
 
 function onMousedown(event) {
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -79,10 +88,33 @@ function onMousedown(event) {
 	intersects = raycaster.intersectObjects(cubeArray);
 
 	if ( intersects.length ) {
-		console.log( intersects.shift() );
+		hitOjb = intersects[0];
+		
+		dragStart = true;
+		// hitOjb.object.position.z += cubeWidth;
+	} else {
+		intersects = null;
+		dragStart = false;
 	}
 }
-document.addEventListener('mousedown', onMousedown);
+function onMouseup() {
+	dragStart = false;
+}
+
+function onMousemove(event) {
+	if (dragStart) {
+		var newMouse = new THREE.Vector2( 0, 0 );
+		newMouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		// 下一个鼠标位置的二维向量
+		newMouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+		newMouse = newMouse.sub( mouse ).normalize();
+		mouseDirector = Math.atan2( newMouse.y, newMouse.x ) * 180 / Math.PI;
+		
+		dragStart = false;
+		console.log(mouseDirector);
+	}
+}
 
 
 // render & helper
