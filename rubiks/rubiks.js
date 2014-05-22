@@ -44,11 +44,14 @@ var cubeMaterial = new THREE.MeshFaceMaterial(materialArray);
 
 // 魔方基本模型
 var cubeArray = [],
+	cubes = [],
 	cube = new THREE.Mesh(cubeGeo.clone(), cubeMaterial),
 	_cube,x,y,z;
 
 for (x=0; x < 3; x++) {
+	cubeArray[x] = [];
 	for (y=0; y < 3; y++) {
+		cubeArray[x][y] = [];
 		for (z=0; z < 3; z++) {
 			_cube = cube.clone();
 			_cube.position.set(
@@ -56,14 +59,18 @@ for (x=0; x < 3; x++) {
 					(y-1)*cubeWidth,
 					(z-1)*cubeWidth);
 
-			cubeArray.push(_cube);
+			_cube.coordinate = {x:x,y:y,z:z};
+
+			cubeArray[x][y].push(_cube);
+			cubes.push(_cube);
 			scene.add(_cube);
 		}
 	}
 }
 
 // 点击事件
-var mouse = new THREE.Vector2( 0, 0 ),
+var mouse = new THREE.Vector2(),
+	oldPos = new THREE.Vector2(),
 	projector = new THREE.Projector(),
 	raycaster,
 	intersects,
@@ -79,19 +86,20 @@ document.addEventListener('mousemove', onMousemove);
 function onMousedown(event) {
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y =  - ( event.clientY / window.innerHeight ) * 2 + 1;
+	
+	oldPos.x = event.clientX;
+	oldPos.y = event.clientY;
 	// console.log(mouse);
 
 	vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
 	projector.unprojectVector(vector, camera);
 	raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
 
-	intersects = raycaster.intersectObjects(cubeArray);
+	intersects = raycaster.intersectObjects(cubes);
 
 	if ( intersects.length ) {
 		hitOjb = intersects[0];
-		
 		dragStart = true;
-		// hitOjb.object.position.z += cubeWidth;
 	} else {
 		intersects = null;
 		dragStart = false;
@@ -103,16 +111,32 @@ function onMouseup() {
 
 function onMousemove(event) {
 	if (dragStart) {
-		var newMouse = new THREE.Vector2( 0, 0 );
-		newMouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-		// 下一个鼠标位置的二维向量
-		newMouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+		// 下个鼠标轨迹
+		var newPos = new THREE.Vector2( event.clientX, event.clientY);
+		// 下个鼠标相对点
+		var nextMouse = new THREE.Vector2();
+		nextMouse.x = (event.clientX / window.innerWidth)*2 - 1;
+		nextMouse.y = -(event.clientY / window.innerHeight)*2 + 1;
 
-		newMouse = newMouse.sub( mouse ).normalize();
-		mouseDirector = Math.atan2( newMouse.y, newMouse.x ) * 180 / Math.PI;
-		
-		dragStart = false;
-		console.log(mouseDirector);
+		var _distance = oldPos.distanceTo(newPos);
+
+		if (_distance > 10) {
+			newPos = newPos.sub( oldPos ).normalize();
+			mouseDirector = Math.atan2( newPos.y, newPos.x ) * 180 / Math.PI;
+			// console.log(mouseDirector);
+			// dragStart = false;
+			
+			console.log( hitOjb );
+			if ( mouseDirector > -45 && mouseDirector <= 45 ) {
+				// right
+			} else if ( mouseDirector>45 && mouseDirector <= 135 ) {
+				// bottom
+			} else if ( mouseDirector>135 || mouseDirector <= - 135 ) {
+				// left
+			} else if (mouseDirector>-135 && mouseDirector<= -45) {
+				// top
+			}
+		}
 	}
 }
 
