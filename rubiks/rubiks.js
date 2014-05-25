@@ -46,6 +46,7 @@ var cubeMaterial = new THREE.MeshFaceMaterial(materialArray);
 var cubeArray = [],
 	cubes = [],
 	cube = new THREE.Mesh(cubeGeo.clone(), cubeMaterial),
+	centerPoint = new THREE.Vector3(0,0,0),
 	_cube,x,y,z;
 
 for (x=0; x < 3; x++) {
@@ -59,7 +60,7 @@ for (x=0; x < 3; x++) {
 					(y-1)*cubeWidth,
 					(z-1)*cubeWidth);
 
-			_cube.coordinate = {x:x,y:y,z:z};
+			_cube.userData.coordinate = {x:x,y:y,z:z};
 
 			cubeArray[x][y].push(_cube);
 			cubes.push(_cube);
@@ -125,8 +126,12 @@ function onMousemove(event) {
 			mouseDirector = Math.atan2( newPos.y, newPos.x ) * 180 / Math.PI;
 			// console.log(mouseDirector);
 			// dragStart = false;
-			
-			console.log( hitOjb );
+			var m1 = new THREE.Matrix4();
+			hitOjb.object.matrixWorld.makeRotationX( 2*Math.PI/3 );
+			hitOjb.object.matrixWorld.makeRotationY( 2*Math.PI/3 );
+			hitOjb.object.matrixWorld.makeRotationZ( 2*Math.PI/3 );
+
+
 			if ( mouseDirector > -45 && mouseDirector <= 45 ) {
 				// right
 			} else if ( mouseDirector>45 && mouseDirector <= 135 ) {
